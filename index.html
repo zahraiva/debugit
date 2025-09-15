@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Find the Bug — Holberton Mini-Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --holberton-red: #E74C3C;
+      --bg: #0f1115;
+      --panel: #151821;
+      --panel-2: #1b2030;
+      --text: #ECEFF4;
+      --muted: #aeb6c2;
+      --success: #2ecc71;
+      --warning: #f1c40f;
+      --error: #e74c3c;
+      --code-bg: #1e1e1e;
+      --code-border: #2a2f3a;
+      --shadow: 0 10px 30px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.25);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --accent: var(--holberton-red);
+    }
+
+    html, body {
+      height: 100%;
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(231, 76, 60, 0.12), transparent 50%),
+                  radial-gradient(1000px 900px at 120% 110%, rgba(231, 76, 60, 0.10), transparent 50%),
+                  var(--bg);
+      color: var(--text);
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 40px 16px;
+    }
+
+    .card {
+      width: min(920px, 100%);
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(231,76,60,0.15);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(231,76,60,0.35);
+    }
+
+    .logo img { width: 40px; height: 40px; object-fit: contain; }
+
+    .title {
+      display: flex;
+      flex-direction: column;
+    }
+    .title h1 {
+      font-size: 22px;
+      line-height: 1.15;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .title p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-left: auto;
+    }
+    .stat {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: grid;
+      place-items: center;
+      min-width: 88px;
+    }
+    .stat .label { color: var(--muted); font-size: 11px; letter-spacing: .3px; text-transform: uppercase; }
+    .stat .value { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 18px; margin-top: 6px; }
+
+    .code-panel {
+      background: radial-gradient(600px 200px at 20% 0%, rgba(231, 76, 60, 0.08), transparent), var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, #202535, #1a1f2c);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .dots { display: flex; gap: 8px; margin-right: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #4c556a; }
+    .dot.red { background: var(--accent); }
+    .filename { color: #cfd6e6; font-size: 12px; font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+    .code-lines {
+      padding: 12px 0;
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #eaeef7;
+      font-size: 14px;
+      line-height: 1.7;
+      counter-reset: line;
+    }
+    .line {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      padding: 2px 18px 2px 12px;
+      align-items: start;
+      cursor: pointer;
+      position: relative;
+      transition: background 160ms ease, transform 120ms ease, box-shadow 120ms ease;
+    }
+    .line:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .line:active { transform: translateY(1px); }
+    .ln {
+      color: #5c6370;
+      text-align: right;
+      padding-right: 8px;
+      user-select: none;
+    }
+    .code {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Syntax-like colors */
+    .tok-key { color: #c678dd; }
+    .tok-fn  { color: #61afef; }
+    .tok-str { color: #98c379; }
+    .tok-num { color: #d19a66; }
+    .tok-kwd { color: var(--accent); }
+    .tok-com { color: #7f848e; font-style: italic; }
+
+    .correct { background: rgba(46, 204, 113, 0.12); }
+    .wrong   { animation: shake 300ms ease; background: rgba(231, 76, 60, 0.12); }
+
+    @keyframes shake {
+      10% { transform: translateX(-2px); }
+      20% { transform: translateX(2px); }
+      30% { transform: translateX(-2px); }
+      40% { transform: translateX(2px); }
+    }
+
+    .footer {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 4px 0;
+    }
+    .feedback {
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .feedback.positive { color: var(--success); }
+    .feedback.negative { color: var(--error); }
+
+    .controls { display: flex; gap: 10px; }
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(231, 76, 60, 0.9), rgba(231, 76, 60, 0.8));
+      color: white;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: .2px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(231,76,60,.3);
+      transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+    }
+    .btn:hover { box-shadow: 0 10px 22px rgba(231,76,60,.36); }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary {
+      background: linear-gradient(180deg, #242a3b, #1d2333);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+
+    @media (max-width: 640px) {
+      .header { flex-wrap: wrap; gap: 12px; }
+      .stats { width: 100%; margin-left: 0; }
+      .stat { flex: 1; }
+    }
+    .hidden { display: none !important; }
+    .center { text-align: center; }
+    .input-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .field {
+      flex: 1 1 220px;
+      display: grid;
+      gap: 6px;
+    }
+    .label { color: var(--muted); font-size: 12px; letter-spacing: .3px; text-transform: uppercase; }
+    .text-input {
+      background: #1b2030;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      padding: 12px 12px;
+      border-radius: 12px;
+      outline: none;
+      font: inherit;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .text-input:focus { border-color: rgba(231,76,60,0.6); box-shadow: 0 0 0 4px rgba(231,76,60,0.1); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main class="card" aria-live="polite">
+      <!-- Intro View -->
+      <section id="introView">
+        <section class="header">
+          <div class="logo" aria-hidden="true">
+            <img src="holberton-logo.webp" alt="Holberton" />
+          </div>
+          <div class="title">
+            <h1>Find the Bug</h1>
+            <p>Enter your name to start. 5 questions. Fast clicks = more points.</p>
+          </div>
+        </section>
+        <div class="input-row" style="margin-top: 8px;">
+          <div class="field">
+            <label class="label" for="firstName">First Name</label>
+            <input id="firstName" class="text-input" type="text" placeholder="Name" autocomplete="given-name" />
+          </div>
+          <div class="field">
+            <label class="label" for="lastName">Last Name</label>
+            <input id="lastName" class="text-input" type="text" placeholder="Surname" autocomplete="family-name" />
+          </div>
+        </div>
+        <div class="footer" style="padding-left: 0; padding-right: 0;">
+          <div class="feedback" id="introFeedback"></div>
+          <div class="controls">
+            <button id="startBtn" class="btn" type="button">Start Quiz</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Game View -->
+      <section id="gameView" class="hidden">
+      <section class="header">
+        <div class="logo" aria-hidden="true">
+          <img src="holberton-logo.webp" alt="Holberton" />
+        </div>
+        <div class="title">
+          <h1>Find the Bug</h1>
+          <p>Spot the buggy line. Faster clicks earn more points.</p>
+        </div>
+        <div class="stats">
+          <div class="stat" aria-label="Score">
+            <div class="label">Score</div>
+            <div class="value" id="score">0</div>
+          </div>
+          <div class="stat" aria-label="Timer">
+            <div class="label">Time</div>
+            <div class="value" id="timer">0.0s</div>
+          </div>
+          <div class="stat" aria-label="Question">
+            <div class="label">Question</div>
+            <div class="value" id="qnum">1/5</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="code-panel" role="group" aria-label="Code snippet">
+        <div class="code-header">
+          <div class="dots"><span class="dot red"></span><span class="dot"></span><span class="dot"></span></div>
+          <span class="filename" id="filename">snippet.js</span>
+        </div>
+        <div id="code" class="code-lines"></div>
+      </section>
+
+      <div class="footer">
+        <div id="feedback" class="feedback" aria-live="polite"></div>
+        <div class="controls">
+          <button id="playAgain" class="btn" type="button">Play Again</button>
+          <button id="nextBtn" class="btn secondary" type="button" aria-label="Next snippet">Next</button>
+        </div>
+      </div>
+      </section>
+
+      <!-- Results View -->
+      <section id="resultsView" class="hidden">
+        <section class="header">
+          <div class="logo" aria-hidden="true">
+            <img src="holberton-logo.webp" alt="Holberton" />
+          </div>
+          <div class="title">
+            <h1>Results</h1>
+            <p id="resultSubtitle">Great job!</p>
+          </div>
+        </section>
+        <div class="code-panel" role="region" aria-label="Results">
+          <div class="code-header">
+            <div class="dots"><span class="dot red"></span><span class="dot"></span><span class="dot"></span></div>
+            <span class="filename">summary.txt</span>
+          </div>
+          <div class="code-lines">
+            <div class="line" style="cursor: default;">
+              <div class="ln">01</div>
+              <div class="code"><span class="tok-com">// Player</span> <span id="resultName" class="tok-str">""</span></div>
+            </div>
+            <div class="line" style="cursor: default;">
+              <div class="ln">02</div>
+              <div class="code"><span class="tok-com">// Total Questions</span> <span class="tok-num">5</span></div>
+            </div>
+            <div class="line" style="cursor: default;">
+              <div class="ln">03</div>
+              <div class="code"><span class="tok-com">// Final Score</span> <span id="resultScore" class="tok-num">0</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="feedback" id="resultFeedback"></div>
+          <div class="controls">
+            <button id="restartBtn" class="btn" type="button">Restart</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const TOTAL_QUESTIONS = 5;
+
+    const state = {
+      score: 0,
+      roundStartTs: 0,
+      timerInterval: null,
+      currentIndex: 0,
+      order: [],
+      locked: false,
+      answered: 0,
+      player: { first: '', last: '' },
+    };
+
+    const el = {
+      introView: document.getElementById('introView'),
+      gameView: document.getElementById('gameView'),
+      resultsView: document.getElementById('resultsView'),
+      score: document.getElementById('score'),
+      timer: document.getElementById('timer'),
+      code: document.getElementById('code'),
+      file: document.getElementById('filename'),
+      feedback: document.getElementById('feedback'),
+      playAgain: document.getElementById('playAgain'),
+      nextBtn: document.getElementById('nextBtn'),
+      qnum: document.getElementById('qnum'),
+      // intro elements
+      firstName: document.getElementById('firstName'),
+      lastName: document.getElementById('lastName'),
+      startBtn: document.getElementById('startBtn'),
+      introFeedback: document.getElementById('introFeedback'),
+      // results elements
+      resultName: document.getElementById('resultName'),
+      resultScore: document.getElementById('resultScore'),
+      resultSubtitle: document.getElementById('resultSubtitle'),
+      restartBtn: document.getElementById('restartBtn'),
+    };
+
+    const snippets = [
+      {
+        file: 'math.js',
+        lines: [
+          'function add(a, b) {',
+          '  return a + b;',
+          '}',
+          '',
+          '// usage: add(2, 3) // 5',
+        ],
+        bugIndex: 3, // obvious: stray empty line is okay; better bug below
+      },
+      {
+        file: 'greet.js',
+        lines: [
+          'const name = "Holberton";',
+          'function greet(who) {',
+          '  console.log("Hello, " + who);',
+          '}',
+          'greet(nam); // typo: nam',
+        ],
+        bugIndex: 4,
+      },
+      {
+        file: 'counter.py',
+        lines: [
+          'count = 0',
+          'def increment():',
+          '    global count',
+          '    count = count + 1',
+          'print(countt)  # typo: countt',
+        ],
+        bugIndex: 4,
+      },
+      {
+        file: 'styles.css',
+        lines: [
+          'body {',
+          '  background: #fff;',
+          '  color: #000;',
+          '  paddding: 16px; /* typo paddding */',
+          '}',
+        ],
+        bugIndex: 3,
+      },
+      {
+        file: 'index.html',
+        lines: [
+          '<!DOCTYPE html>',
+          '<html>',
+          '<head><title>App</title></head>',
+          '<body>',
+          '<div id="root"></iv> <!-- missing d in </div> -->',
+        ],
+        bugIndex: 4,
+      },
+      {
+        file: 'sum.ts',
+        lines: [
+          'export function sum(a: number, b: number): number {',
+          '  return a + b;',
+          '}',
+          'const total = sum(2, "3"); // wrong type',
+          'console.log(total);',
+        ],
+        bugIndex: 3,
+      },
+    ].map(s => ({ ...s, bugIndex: s.bugIndex }));
+
+    // Replace one snippet with a more obvious JS bug for first example
+    snippets[0] = {
+      file: 'math.js',
+      lines: [
+        'function add(a, b) {',
+        '  return a - b; // should be +',
+        '}',
+        'console.log(add(2, 3)); // 5',
+        '',
+      ],
+      bugIndex: 1,
+    };
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function initOrder() {
+      // Choose a random subset of snippets sized to TOTAL_QUESTIONS
+      const all = shuffle([...Array(snippets.length).keys()]);
+      state.order = all.slice(0, Math.min(TOTAL_QUESTIONS, all.length));
+      state.currentIndex = 0;
+    }
+
+    function formatTime(ms) {
+      return (ms / 1000).toFixed(1) + 's';
+    }
+
+    function startTimer() {
+      stopTimer();
+      state.roundStartTs = Date.now();
+      el.timer.textContent = '0.0s';
+      state.timerInterval = setInterval(() => {
+        const elapsed = Date.now() - state.roundStartTs;
+        el.timer.textContent = formatTime(elapsed);
+      }, 100);
+    }
+
+    function stopTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    function awardPoints(elapsedMs) {
+      // Faster = more points. Decays over ~18s to a floor of 10.
+      const points = Math.max(10, 100 - Math.floor(elapsedMs / 200));
+      state.score += points;
+      el.score.textContent = state.score;
+      flashFeedback(`+${points} points`, true);
+    }
+
+    function flashFeedback(text, positive) {
+      el.feedback.textContent = text;
+      el.feedback.classList.toggle('positive', !!positive);
+      el.feedback.classList.toggle('negative', !positive);
+      if (!text) return;
+      setTimeout(() => { el.feedback.textContent = ''; }, 1200);
+    }
+
+    function syntaxHighlight(line) {
+      // Very lightweight token coloring for demo purposes
+      const patterns = [
+        { r: /(\/\/.*$)/g, cls: 'tok-com' },
+        { r: /('[^']*'|"[^"]*"|`[^`]*`)/g, cls: 'tok-str' },
+        { r: /\b(function|return|const|let|var|export|def|global|print|body|div|class)\b/g, cls: 'tok-kwd' },
+        { r: /\b([A-Za-z_][A-Za-z0-9_]*)\s*(?=\()/g, cls: 'tok-fn' },
+        { r: /\b(\d+)\b/g, cls: 'tok-num' },
+      ];
+      let html = line
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      for (const { r, cls } of patterns) {
+        html = html.replace(r, (m) => `<span class="${cls}">${m}</span>`);
+      }
+      return html || '&nbsp;';
+    }
+
+    function renderSnippet(snippet) {
+      el.file.textContent = snippet.file;
+      el.code.innerHTML = '';
+      snippet.lines.forEach((text, i) => {
+        const row = document.createElement('div');
+        row.className = 'line';
+        row.setAttribute('role', 'button');
+        row.setAttribute('tabindex', '0');
+        row.setAttribute('aria-label', `Line ${i + 1}`);
+
+        const ln = document.createElement('div');
+        ln.className = 'ln';
+        ln.textContent = String(i + 1).padStart(2, '0');
+
+        const code = document.createElement('div');
+        code.className = 'code';
+        code.innerHTML = syntaxHighlight(text);
+
+        row.appendChild(ln);
+        row.appendChild(code);
+
+        row.addEventListener('click', () => onClickLine(i, snippet.bugIndex, row));
+        row.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
+        });
+
+        el.code.appendChild(row);
+      });
+
+      startTimer();
+      state.locked = false;
+      el.nextBtn.disabled = true;
+      el.nextBtn.style.opacity = 0.6;
+      el.qnum.textContent = `${state.answered + 1}/${TOTAL_QUESTIONS}`;
+    }
+
+    function onClickLine(idx, bugIdx, rowEl) {
+      if (state.locked) return;
+      const elapsed = Date.now() - state.roundStartTs;
+      if (idx === bugIdx) {
+        state.locked = true;
+        stopTimer();
+        rowEl.classList.add('correct');
+        awardPoints(elapsed);
+        el.nextBtn.disabled = false;
+        el.nextBtn.style.opacity = 1;
+        // Auto-advance after a short delay
+        setTimeout(nextSnippet, 800);
+      } else {
+        rowEl.classList.remove('correct');
+        rowEl.classList.add('wrong');
+        flashFeedback('Not a bug — try again!', false);
+        setTimeout(() => rowEl.classList.remove('wrong'), 350);
+      }
+    }
+
+    function nextSnippet() {
+      el.feedback.textContent = '';
+      state.answered += 1;
+      if (state.answered >= TOTAL_QUESTIONS) {
+        endGame();
+        return;
+      }
+      const nextIdx = state.currentIndex + 1;
+      state.currentIndex = nextIdx;
+      const snippet = snippets[state.order[state.currentIndex]];
+      renderSnippet(snippet);
+    }
+
+    function startGame() {
+      state.score = 0;
+      state.answered = 0;
+      el.score.textContent = '0';
+      el.timer.textContent = '0.0s';
+      initOrder();
+      showView('game');
+      renderSnippet(snippets[state.order[state.currentIndex]]);
+      flashFeedback('', true);
+    }
+
+    function endGame() {
+      stopTimer();
+      // Populate results
+      const fn = state.player.first.trim();
+      const ln = state.player.last.trim();
+      el.resultName.textContent = `"${fn} ${ln}"`;
+      el.resultScore.textContent = String(state.score);
+      el.resultSubtitle.textContent = `Well done, ${fn} ${ln}!`;
+      showView('results');
+    }
+
+    function showView(view) {
+      const intro = view === 'intro';
+      const game = view === 'game';
+      const results = view === 'results';
+      el.introView.classList.toggle('hidden', !intro);
+      el.gameView.classList.toggle('hidden', !game);
+      el.resultsView.classList.toggle('hidden', !results);
+    }
+
+    // Controls
+    el.playAgain.addEventListener('click', () => startGame());
+    el.nextBtn.addEventListener('click', () => nextSnippet());
+    el.startBtn.addEventListener('click', () => {
+      const first = (el.firstName.value || '').trim();
+      const last = (el.lastName.value || '').trim();
+      if (!first || !last) {
+        el.introFeedback.textContent = 'Please enter both first and last name.';
+        return;
+      }
+      el.introFeedback.textContent = '';
+      state.player.first = first;
+      state.player.last = last;
+      startGame();
+    });
+    el.restartBtn.addEventListener('click', () => {
+      // Clear previous inputs and go back to intro for next player
+      el.firstName.value = '';
+      el.lastName.value = '';
+      state.player = { first: '', last: '' };
+      state.score = 0;
+      state.answered = 0;
+      el.score.textContent = '0';
+      el.timer.textContent = '0.0s';
+      el.qnum.textContent = `1/${TOTAL_QUESTIONS}`;
+      showView('intro');
+      el.firstName.focus();
+    });
+
+    // Kickoff at intro
+    showView('intro');
+  </script>
+</body>
+</html>
+
+
