@@ -341,7 +341,7 @@
             </div>
             <div class="line" style="cursor: default;">
               <div class="ln">02</div>
-              <div class="code"><span class="tok-com">// Total Questions</span> <span class="tok-num">5</span></div>
+              <div class="code"><span class="tok-com">// Time Spent</span> <span id="resultTime" class="tok-num">0.0s</span></div>
             </div>
             <div class="line" style="cursor: default;">
               <div class="ln">03</div>
@@ -687,7 +687,11 @@
       const ln = state.player.last.trim();
       el.resultName.textContent = `"${fn} ${ln}"`;
       el.resultScore.textContent = String(state.score);
-      el.resultSubtitle.textContent = `Well done, ${fn} ${ln}!`;
+      const elapsedMs = Math.min(Date.now() - state.gameStartTs, TOTAL_TIME_MS);
+      const timeSpent = (elapsedMs / 1000).toFixed(1) + 's';
+      const resultTimeEl = document.getElementById('resultTime');
+      if (resultTimeEl) resultTimeEl.textContent = timeSpent;
+      el.resultSubtitle.textContent = `Congrats, ${fn} ${ln}!`;
       showView('results');
     }
 
