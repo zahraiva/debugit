@@ -411,6 +411,7 @@
       locked: false,
       answered: 0,
       player: { first: '', last: '' },
+      wrongAttemptsInSnippet: 0,
     };
 
     const el = {
@@ -604,6 +605,7 @@
     function renderSnippet(snippet) {
       el.file.textContent = snippet.file;
       el.code.innerHTML = '';
+      state.wrongAttemptsInSnippet = 0;
       snippet.lines.forEach((text, i) => {
         const row = document.createElement('div');
         row.className = 'line';
@@ -650,7 +652,12 @@
       } else {
         rowEl.classList.remove('correct');
         rowEl.classList.add('wrong');
-        flashFeedback('Not a bug — try again!', false);
+        // Escalating per-question penalty: -5, -10, then -15 (cap)
+        state.wrongAttemptsInSnippet += 1;
+        const penalty = state.wrongAttemptsInSnippet === 1 ? 5 : state.wrongAttemptsInSnippet === 2 ? 10 : 15;
+        state.score = Math.max(0, state.score - penalty);
+        el.score.textContent = state.score;
+        flashFeedback(`-${penalty} points`, false);
         setTimeout(() => rowEl.classList.remove('wrong'), 350);
       }
     }
@@ -671,6 +678,7 @@
     function startGame() {
       state.score = 0;
       state.answered = 0;
+      state.wrongAttemptsInSnippet = 0;
       el.score.textContent = '0';
       el.timer.textContent = formatTime(TOTAL_TIME_MS);
       initOrder();
