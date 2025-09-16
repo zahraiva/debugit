@@ -254,7 +254,7 @@
           </div>
           <div class="title">
             <h1>Find the Bug</h1>
-            <p>Enter your name to start. 5 questions. Fast clicks = more points.</p>
+            <p>You have 20 seconds to find 5 bugs. Faster clicks = more points.</p>
           </div>
         </section>
         <div class="input-row" style="margin-top: 8px;">
@@ -291,8 +291,8 @@
             <div class="value" id="score">0</div>
           </div>
           <div class="stat" aria-label="Timer">
-            <div class="label">Time</div>
-            <div class="value" id="timer">0.0s</div>
+            <div class="label">Time Left</div>
+            <div class="value" id="timer">20.0s</div>
           </div>
           <div class="stat" aria-label="Question">
             <div class="label">Question</div>
@@ -356,15 +356,55 @@
           </div>
         </div>
       </section>
+
+      <!-- Lost View -->
+      <section id="lostView" class="hidden">
+        <section class="header">
+          <div class="logo" aria-hidden="true">
+            <img src="holberton-logo.webp" alt="Holberton" />
+          </div>
+          <div class="title">
+            <h1>Time's up!</h1>
+            <p id="lostSubtitle">Out of time. Let’s switch to the next player.</p>
+          </div>
+        </section>
+        <div class="code-panel" role="region" aria-label="Time up">
+          <div class="code-header">
+            <div class="dots"><span class="dot red"></span><span class="dot"></span><span class="dot"></span></div>
+            <span class="filename">timeout.txt</span>
+          </div>
+          <div class="code-lines">
+            <div class="line" style="cursor: default;">
+              <div class="ln">01</div>
+              <div class="code"><span class="tok-com">// Player</span> <span id="lostName" class="tok-str">""</span></div>
+            </div>
+            <div class="line" style="cursor: default;">
+              <div class="ln">02</div>
+              <div class="code"><span class="tok-com">// Score</span> <span id="lostScore" class="tok-num">0</span></div>
+            </div>
+            <div class="line" style="cursor: default;">
+              <div class="ln">03</div>
+              <div class="code"><span class="tok-com">// Status</span> <span class="tok-str">"Time limit reached"</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="feedback"></div>
+          <div class="controls">
+            <button id="nextPlayerBtn" class="btn" type="button">Next Player</button>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
   <script>
     const TOTAL_QUESTIONS = 5;
+    const TOTAL_TIME_MS = 20000;
 
     const state = {
       score: 0,
-      roundStartTs: 0,
+      gameStartTs: 0,
       timerInterval: null,
       currentIndex: 0,
       order: [],
@@ -377,6 +417,7 @@
       introView: document.getElementById('introView'),
       gameView: document.getElementById('gameView'),
       resultsView: document.getElementById('resultsView'),
+      lostView: document.getElementById('lostView'),
       score: document.getElementById('score'),
       timer: document.getElementById('timer'),
       code: document.getElementById('code'),
@@ -395,6 +436,11 @@
       resultScore: document.getElementById('resultScore'),
       resultSubtitle: document.getElementById('resultSubtitle'),
       restartBtn: document.getElementById('restartBtn'),
+      // lost elements
+      lostName: document.getElementById('lostName'),
+      lostScore: document.getElementById('lostScore'),
+      lostSubtitle: document.getElementById('lostSubtitle'),
+      nextPlayerBtn: document.getElementById('nextPlayerBtn'),
     };
 
     const snippets = [
@@ -500,11 +546,16 @@
 
     function startTimer() {
       stopTimer();
-      state.roundStartTs = Date.now();
-      el.timer.textContent = '0.0s';
+      state.gameStartTs = Date.now();
+      el.timer.textContent = formatTime(TOTAL_TIME_MS);
       state.timerInterval = setInterval(() => {
-        const elapsed = Date.now() - state.roundStartTs;
-        el.timer.textContent = formatTime(elapsed);
+        const elapsed = Date.now() - state.gameStartTs;
+        const remaining = Math.max(0, TOTAL_TIME_MS - elapsed);
+        el.timer.textContent = formatTime(remaining);
+        if (remaining <= 0) {
+          stopTimer();
+          loseGame();
+        }
       }, 100);
     }
 
@@ -579,7 +630,6 @@
         el.code.appendChild(row);
       });
 
-      startTimer();
       state.locked = false;
       el.nextBtn.disabled = true;
       el.nextBtn.style.opacity = 0.6;
@@ -588,10 +638,9 @@
 
     function onClickLine(idx, bugIdx, rowEl) {
       if (state.locked) return;
-      const elapsed = Date.now() - state.roundStartTs;
+      const elapsed = Date.now() - state.gameStartTs;
       if (idx === bugIdx) {
         state.locked = true;
-        stopTimer();
         rowEl.classList.add('correct');
         awardPoints(elapsed);
         el.nextBtn.disabled = false;
@@ -623,9 +672,10 @@
       state.score = 0;
       state.answered = 0;
       el.score.textContent = '0';
-      el.timer.textContent = '0.0s';
+      el.timer.textContent = formatTime(TOTAL_TIME_MS);
       initOrder();
       showView('game');
+      startTimer();
       renderSnippet(snippets[state.order[state.currentIndex]]);
       flashFeedback('', true);
     }
@@ -641,13 +691,25 @@
       showView('results');
     }
 
+    function loseGame() {
+      // Populate lost view
+      const fn = state.player.first.trim();
+      const ln = state.player.last.trim();
+      el.lostName.textContent = `"${fn} ${ln}"`;
+      el.lostScore.textContent = String(state.score);
+      el.lostSubtitle.textContent = 'Out of time. Let’s switch to the next player.';
+      showView('lost');
+    }
+
     function showView(view) {
       const intro = view === 'intro';
       const game = view === 'game';
       const results = view === 'results';
+      const lost = view === 'lost';
       el.introView.classList.toggle('hidden', !intro);
       el.gameView.classList.toggle('hidden', !game);
       el.resultsView.classList.toggle('hidden', !results);
+      el.lostView.classList.toggle('hidden', !lost);
     }
 
     // Controls
@@ -673,10 +735,13 @@
       state.score = 0;
       state.answered = 0;
       el.score.textContent = '0';
-      el.timer.textContent = '0.0s';
+      el.timer.textContent = formatTime(TOTAL_TIME_MS);
       el.qnum.textContent = `1/${TOTAL_QUESTIONS}`;
       showView('intro');
       el.firstName.focus();
+    });
+    el.nextPlayerBtn?.addEventListener('click', () => {
+      el.restartBtn.click();
     });
 
     // Kickoff at intro
