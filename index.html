@@ -444,87 +444,30 @@
       nextPlayerBtn: document.getElementById('nextPlayerBtn'),
     };
 
-    const snippets = [
-      {
-        file: 'math.js',
-        lines: [
-          'function add(a, b) {',
-          '  return a + b;',
-          '}',
-          '',
-          '// usage: add(2, 3) // 5',
-        ],
-        bugIndex: 3, // obvious: stray empty line is okay; better bug below
-      },
-      {
-        file: 'greet.js',
-        lines: [
-          'const name = "Holberton";',
-          'function greet(who) {',
-          '  console.log("Hello, " + who);',
-          '}',
-          'greet(nam); // typo: nam',
-        ],
-        bugIndex: 4,
-      },
-      {
-        file: 'counter.py',
-        lines: [
-          'count = 0',
-          'def increment():',
-          '    global count',
-          '    count = count + 1',
-          'print(countt)  # typo: countt',
-        ],
-        bugIndex: 4,
-      },
-      {
-        file: 'styles.css',
-        lines: [
-          'body {',
-          '  background: #fff;',
-          '  color: #000;',
-          '  paddding: 16px; /* typo paddding */',
-          '}',
-        ],
-        bugIndex: 3,
-      },
-      {
-        file: 'index.html',
-        lines: [
-          '<!DOCTYPE html>',
-          '<html>',
-          '<head><title>App</title></head>',
-          '<body>',
-          '<div id="root"></iv> <!-- missing d in </div> -->',
-        ],
-        bugIndex: 4,
-      },
-      {
-        file: 'sum.ts',
-        lines: [
-          'export function sum(a: number, b: number): number {',
-          '  return a + b;',
-          '}',
-          'const total = sum(2, "3"); // wrong type',
-          'console.log(total);',
-        ],
-        bugIndex: 3,
-      },
-    ].map(s => ({ ...s, bugIndex: s.bugIndex }));
-
-    // Replace one snippet with a more obvious JS bug for first example
-    snippets[0] = {
-      file: 'math.js',
-      lines: [
-        'function add(a, b) {',
-        '  return a - b; // should be +',
-        '}',
-        'console.log(add(2, 3)); // 5',
-        '',
-      ],
-      bugIndex: 1,
-    };
+    let snippets = [];
+    let snippetsLoaded = false;
+    async function loadSnippets() {
+      try {
+        const res = await fetch('questions.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to load questions.json');
+        const data = await res.json();
+        const raw = Array.isArray(data?.snippets) ? data.snippets : Array.isArray(data) ? data : [];
+        const isValidSnippet = (s) => (
+          s && typeof s.file === 'string' && s.file.trim().length > 0 &&
+          Array.isArray(s.lines) && s.lines.length > 0 && s.lines.every(l => typeof l === 'string') &&
+          Number.isInteger(s.bugIndex) && s.bugIndex >= 0 && s.bugIndex < s.lines.length
+        );
+        snippets = raw.filter(isValidSnippet).map(s => ({ ...s, bugIndex: s.bugIndex }));
+        if (snippets.length === 0) throw new Error('No valid snippets');
+        snippetsLoaded = true;
+      } catch (e) {
+        snippets = [];
+        snippetsLoaded = true;
+        const msg = 'Failed to load questions. Please refresh.';
+        if (el.introFeedback) el.introFeedback.textContent = msg;
+      }
+    }
+    loadSnippets();
 
     function shuffle(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
@@ -728,6 +671,14 @@
     el.playAgain.addEventListener('click', () => startGame());
     el.nextBtn.addEventListener('click', () => nextSnippet());
     el.startBtn.addEventListener('click', () => {
+      if (!snippetsLoaded) {
+        el.introFeedback.textContent = 'Loading questions...';
+        return;
+      }
+      if (!snippets || snippets.length === 0) {
+        el.introFeedback.textContent = 'No questions available.';
+        return;
+      }
       const first = (el.firstName.value || '').trim();
       const last = (el.lastName.value || '').trim();
       if (!first || !last) {

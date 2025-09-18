@@ -1,0 +1,70 @@
+{
+  "snippets": [
+    {
+      "file": "math.js",
+      "lines": [
+        "function add(a, b) {",
+        "  return a - b; // should be +",
+        "}",
+        "console.log(add(2, 3)); // 5",
+        ""
+      ],
+      "bugIndex": 1
+    },
+    {
+      "file": "greet.js",
+      "lines": [
+        "const name = \"Holberton\";",
+        "function greet(who) {",
+        "  console.log(\"Hello, \" + who);",
+        "}",
+        "greet(nam); // typo: nam"
+      ],
+      "bugIndex": 4
+    },
+    {
+      "file": "counter.py",
+      "lines": [
+        "count = 0",
+        "def increment():",
+        "    global count",
+        "    count = count + 1",
+        "print(countt)  # typo: countt"
+      ],
+      "bugIndex": 4
+    },
+    {
+      "file": "styles.css",
+      "lines": [
+        "body {",
+        "  background: #fff;",
+        "  color: #000;",
+        "  paddding: 16px; /* typo paddding */",
+        "}"
+      ],
+      "bugIndex": 3
+    },
+    {
+      "file": "index.html",
+      "lines": [
+        "<!DOCTYPE html>",
+        "<html>",
+        "<head><title>App</title></head>",
+        "<body>",
+        "<div id=\"root\"></iv> <!-- missing d in </div> -->"
+      ],
+      "bugIndex": 4
+    },
+    {
+      "file": "sum.ts",
+      "lines": [
+        "export function sum(a: number, b: number): number {",
+        "  return a + b;",
+        "}",
+        "const total = sum(2, \"3\"); // wrong type",
+        "console.log(total);"
+      ],
+      "bugIndex": 3
+    }
+  ]
+}
