@@ -1,70 +1,96 @@
 {
   "snippets": [
-    {
-      "file": "math.js",
-      "lines": [
-        "function add(a, b) {",
-        "  return a - b; // should be +",
-        "}",
-        "console.log(add(2, 3)); // 5",
-        ""
-      ],
-      "bugIndex": 1
-    },
-    {
-      "file": "greet.js",
-      "lines": [
-        "const name = \"Holberton\";",
-        "function greet(who) {",
-        "  console.log(\"Hello, \" + who);",
-        "}",
-        "greet(nam); // typo: nam"
-      ],
-      "bugIndex": 4
-    },
-    {
-      "file": "counter.py",
-      "lines": [
-        "count = 0",
-        "def increment():",
-        "    global count",
-        "    count = count + 1",
-        "print(countt)  # typo: countt"
-      ],
-      "bugIndex": 4
-    },
-    {
-      "file": "styles.css",
-      "lines": [
-        "body {",
-        "  background: #fff;",
-        "  color: #000;",
-        "  paddding: 16px; /* typo paddding */",
-        "}"
-      ],
-      "bugIndex": 3
-    },
-    {
-      "file": "index.html",
-      "lines": [
-        "<!DOCTYPE html>",
-        "<html>",
-        "<head><title>App</title></head>",
-        "<body>",
-        "<div id=\"root\"></iv> <!-- missing d in </div> -->"
-      ],
-      "bugIndex": 4
-    },
-    {
-      "file": "sum.ts",
-      "lines": [
-        "export function sum(a: number, b: number): number {",
-        "  return a + b;",
-        "}",
-        "const total = sum(2, \"3\"); // wrong type",
-        "console.log(total);"
-      ],
-      "bugIndex": 3
-    }
+    {"file": "easy_add_typo.py", "lines": [
+      "def add(a, b):",
+      "    return a + b",
+      "print(ad(2, 3))  # typo: ad"
+    ], "bugIndex": 2},
+    {"file": "if_missing_colon.py", "lines": [
+      "x = 3",
+      "if x == 3",
+      "    print('ok')"
+    ], "bugIndex": 1},
+    {"file": "type_mix_3.py", "lines": [
+      "a = '4'",
+      "b = 2",
+      "print(a + b)  # str + int"
+    ], "bugIndex": 2},
+    {"file": "zero_div_3.py", "lines": [
+      "a = 10",
+      "b = 0",
+      "print(a / b)  # division by zero"
+    ], "bugIndex": 2},
+    {"file": "fstring_missing_3.py", "lines": [
+      "name = 'Ada'",
+      "age = 30",
+      "print('Hi {name}')  # missing f"
+    ], "bugIndex": 2},
+
+    {"file": "list_oob_4.py", "lines": [
+      "nums = [1, 2, 3]",
+      "i = 3",
+      "val = nums[i]  # out of range",
+      "print(val)"
+    ], "bugIndex": 2},
+    {"file": "missing_indent_def_4.py", "lines": [
+      "def greet(name):",
+      "print('Hi', name)  # missing indent",
+      "return None",
+      "greet('Ada')"
+    ], "bugIndex": 1},
+    {"file": "dict_key_typo_4.py", "lines": [
+      "person = {'age': 30}",
+      "key = 'agee'  # typo",
+      "print(person[key])",
+      "print('done')"
+    ], "bugIndex": 1},
+    {"file": "assign_in_if_4.py", "lines": [
+      "n = 5",
+      "if n = 5:  # should be ==",
+      "    print('ok')",
+      "print('end')"
+    ], "bugIndex": 1},
+    {"file": "wrong_operator_4.py", "lines": [
+      "a = 9",
+      "b = 3",
+      "print(a - b)  # should be /",
+      "print('calc')"
+    ], "bugIndex": 2},
+
+    {"file": "add_typo_5.py", "lines": [
+      "def add(a, b):",
+      "    return a + b",
+      "x = 2",
+      "y = 3",
+      "print(ad(x, y))  # typo: ad"
+    ], "bugIndex": 4},
+    {"file": "fstring_missing_5.py", "lines": [
+      "name = 'Ada'",
+      "age = 30",
+      "if age > 18:",
+      "    print('Adult')",
+      "print('Hello, {name}')  # missing f"
+    ], "bugIndex": 4},
+    {"file": "append_typo_5.py", "lines": [
+      "numbers = [1, 2]",
+      "x = 3",
+      "numbers.pend(x)  # typo: append",
+      "print(len(numbers))",
+      "print(numbers)"
+    ], "bugIndex": 2},
+    {"file": "index_oob_5.py", "lines": [
+      "nums = [10, 20, 30]",
+      "i = 2",
+      "print(nums[i])",
+      "i = 3",
+      "print(nums[i])  # out of range"
+    ], "bugIndex": 4},
+    {"file": "zero_div_5.py", "lines": [
+      "a = 10",
+      "b = 0",
+      "c = a + 5",
+      "print(a / b)  # division by zero",
+      "print(c)"
+    ], "bugIndex": 3}
   ]
 }
