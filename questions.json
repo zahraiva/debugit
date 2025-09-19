@@ -3,7 +3,7 @@
     {"file": "typo.py", "lines": [
       "def add(a, b):",
       "    return a + b",
-      "print(ad(2, 3))  # typo: ad"
+      "print(ad(2, 3))"
     ], "bugIndex": 2},
     {"file": "if_missing_colon.py", "lines": [
       "x = 3",
@@ -13,47 +13,47 @@
     {"file": "type_mix.py", "lines": [
       "a = '4'",
       "b = 2",
-      "print(a + b)  # str + int"
+      "print(a + b)"
     ], "bugIndex": 2},
     {"file": "zero_div.py", "lines": [
       "a = 10",
       "b = 0",
-      "print(a / b)  # division by zero"
+      "print(a / b)"
     ], "bugIndex": 2},
     {"file": "f_missing.py", "lines": [
       "name = 'Ada'",
       "age = 30",
-      "print('Hi {name}')  # missing f"
+      "print('Hi {name}')"
     ], "bugIndex": 2},
 
     {"file": "list_oob.py", "lines": [
       "nums = [1, 2, 3]",
       "i = 3",
-      "val = nums[i]  # out of range",
+      "val = nums[i]",
       "print(val)"
     ], "bugIndex": 2},
     {"file": "missing_indent.py", "lines": [
       "def greet(name):",
-      "print('Hi', name)  # missing indent",
+      "print('Hi', name)",
       "return None",
       "greet('Ada')"
     ], "bugIndex": 1},
     {"file": "dict_typo.py", "lines": [
       "person = {'age': 30}",
-      "key = 'agee'  # typo",
+      "key = 'agee'",
       "print(person[key])",
       "print('done')"
     ], "bugIndex": 1},
     {"file": "assign_in_if.py", "lines": [
       "n = 5",
-      "if n = 5:  # should be ==",
+      "if n = 5:",
       "    print('ok')",
       "print('end')"
     ], "bugIndex": 1},
     {"file": "wrong_operator.py", "lines": [
       "a = 9",
       "b = 3",
-      "print(a - b)  # should be /",
+      "print(a - b)",
       "print('calc')"
     ], "bugIndex": 2},
 
@@ -62,19 +62,19 @@
       "    return a + b",
       "x = 2",
       "y = 3",
-      "print(ad(x, y))  # typo: ad"
+      "print(ad(x, y))"
     ], "bugIndex": 4},
     {"file": "fstr_missing.py", "lines": [
       "name = 'Ada'",
       "age = 30",
       "if age > 18:",
       "    print('Adult')",
-      "print('Hello, {name}')  # missing f"
+      "print('Hello, {name}')"
     ], "bugIndex": 4},
     {"file": "appendtypo.py", "lines": [
       "numbers = [1, 2]",
       "x = 3",
-      "numbers.pend(x)  # typo: append",
+      "numbers.pend(x)",
       "print(len(numbers))",
       "print(numbers)"
     ], "bugIndex": 2},
@@ -83,13 +83,13 @@
       "i = 2",
       "print(nums[i])",
       "i = 3",
-      "print(nums[i])  # out of range"
+      "print(nums[i])"
     ], "bugIndex": 4},
     {"file": "zerodiv.py", "lines": [
       "a = 10",
       "b = 0",
       "c = a + 5",
-      "print(a / b)  # division by zero",
+      "print(a / b)",
       "print(c)"
     ], "bugIndex": 3}
   ]
