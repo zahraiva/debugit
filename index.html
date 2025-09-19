@@ -241,7 +241,45 @@
       font: inherit;
       transition: border-color 120ms ease, box-shadow 120ms ease;
     }
-    .text-input:focus { border-color: rgba(231,76,60,0.6); box-shadow: 0 0 0 4px rgba(231,76,60,0.1); }
+    .text-input:focus { border-color: rgba(161, 58, 47, 0.6); box-shadow: 0 0 0 4px rgba(231,76,60,0.1); }
+    
+    /* Winner announcement styles */
+    .winner-announcement {
+      text-align: center;
+      margin-bottom: 32px;
+      padding: 24px;
+      background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(231, 76, 60, 0.05));
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 32px rgba(231, 76, 60, 0.2);
+    }
+    
+    .winner-title {
+      font-family: Helvetica;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 0 0 16px 0;
+      text-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+      letter-spacing: -0.5px;
+    }
+    
+    .winner-subtitle {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+      opacity: 0.9;
+    }
+    
+    @media (max-width: 640px) {
+      .winner-title {
+        font-size: 2.5rem;
+      }
+      .winner-subtitle {
+        font-size: 1.4rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -321,6 +359,12 @@
 
       <!-- Results View -->
       <section id="resultsView" class="hidden">
+        <!-- Winner Announcement - Above the terminal container -->
+        <div class="winner-announcement">
+          <h1 class="winner-title">CONGRATULATIONS!</h1>
+          <p class="winner-subtitle" id="winnerName">Amazing job!</p>
+        </div>
+        
         <section class="header">
           <div class="logo" aria-hidden="true">
             <img src="holberton-logo.webp" alt="Holberton" />
@@ -438,6 +482,7 @@
       resultScore: document.getElementById('resultScore'),
       resultSubtitle: document.getElementById('resultSubtitle'),
       restartBtn: document.getElementById('restartBtn'),
+      winnerName: document.getElementById('winnerName'),
       // lost elements
       lostName: document.getElementById('lostName'),
       lostScore: document.getElementById('lostScore'),
@@ -643,7 +688,9 @@
       const timeSpent = (elapsedMs / 1000).toFixed(1) + 's';
       const resultTimeEl = document.getElementById('resultTime');
       if (resultTimeEl) resultTimeEl.textContent = timeSpent;
-      el.resultSubtitle.textContent = `Congrats, ${fn} ${ln}!`;
+      el.resultSubtitle.textContent = `Results of ${fn} ${ln}!`;
+      // Update the winner announcement
+      el.winnerName.textContent = `${fn} ${ln} - You did it!`;
       showView('results');
     }
 
